@@ -36,49 +36,78 @@ description: >
 
 # DUDA — Isolation Guardian Skill
 
+<!-- HELP START — When ARGUMENTS is "help", output ONLY this section (until HELP END) and stop. Do NOT output mode details or internal specifications below. -->
+
 ## What is DUDA?
 
-DUDA prevents your AI agent from accidentally breaking isolation boundaries in multi-layered projects.
+**격리(Isolation) 경계가 있는 프로젝트에서, AI가 코드를 건드릴 때 격리를 깨뜨리지 않도록 지키는 스킬입니다.**
 
-**The problem it solves:**
+> 두더지는 땅 위에서는 따로따로지만, 땅 밑에서는 전부 터널로 연결되어 있습니다.
+> 이식 요청은 터널 전체를 파악한 다음에만 실행됩니다.
+> 신뢰점수 95점 미만이면 실행이 차단됩니다.
+
+### 이런 문제를 해결합니다
+
+| 문제 상황 | DUDA 없이 | DUDA 있으면 |
+|----------|----------|------------|
+| 플랫폼 관리자용 컴포넌트를 테넌트에 복사 | 상위 전용 데이터가 하위에 노출. 배포 후 발견 | 복사 전에 `[UPPER-ONLY]` 태그로 차단. 어댑터 패턴 제안 |
+| DB 쿼리에서 `org_id` 필터 누락 | 다른 테넌트 데이터가 유출. 고객 신고로 발견 | 쿼리 분석에서 tenant identifier 누락 감지. 신뢰점수 하락 → 차단 |
+| 모노레포에서 앱 간 직접 import | 빌드 깨짐 + 권한 우회. CI에서 발견 | `duda guard`가 커밋 전에 경계 위반 차단 |
+| 마이크로서비스 간 DB 직접 접근 | 서비스 경계 무너짐. 장애 시 발견 | audit에서 API 우회 경로 탐지. 수정 방법 제시 |
+
+**한마디로**: AI가 "잘 동작하는 코드"를 만들지만 격리가 조용히 깨져있는 상황 — 이걸 코드 한 줄 건드리기 전에 막아줍니다.
+
+### 언제, 어떤 명령어를 쓰면 되는가?
+
+| 이런 상황일 때 | 명령어 | 뭘 해주는가 |
+|--------------|--------|-----------|
+| **처음 시작** — 프로젝트에 DUDA를 적용할 때 | `duda init` | 코드베이스 전체를 탐색해서 격리 지도(DUDA_MAP.md)를 생성. 어떤 파일이 어떤 레이어인지 자동 분류 |
+| **빠른 확인** — "이 파일 저쪽에서 써도 되나?" | `duda scan <path>` | 해당 파일의 import를 분석해서 위험도를 즉시 알려줌. **지도 없이도 사용 가능** |
+| **코드 이식** — 기능을 다른 레이어로 옮길 때 | `duda transplant` | 소스 분석 → 4축 신뢰점수 측정 → 95점 이상일 때만 이식 전략 제시 + 실행 |
+| **사고 대응** — "다른 테넌트 데이터가 보여요" | `duda audit` | 오염 경로를 역추적해서 근본 원인(4가지 유형)과 수정 방법을 알려줌 |
+| **자동 수정** — 진단 결과 기반으로 고치고 싶을 때 | `duda fix` | 수정 코드 생성 → diff 미리보기 → 확인 후 적용. 최대 3회 반복 검증 |
+| **사전 차단** — 커밋 전 격리 위반 확인 | `duda guard` | 변경 파일들의 격리 위반 검사. CI/pre-commit hook 연동 가능 |
+| **지도 갱신** — 코드가 많이 바뀌었을 때 | `duda update` | DUDA_MAP.md를 현재 코드 상태로 재생성 |
+
+### 어떤 프로젝트에서 쓸 수 있는가?
+
+| 격리 유형 | 예시 | 전형적인 위험 |
+|----------|------|-------------|
+| **Type A** 플랫폼-파생 | 본사 플랫폼 → 가맹점/테넌트 앱 | 상위 전용 기능이 하위로 유출 |
+| **Type B** 멀티테넌트 | B2B SaaS에서 회사별 데이터 격리 | 다른 회사 데이터가 보이는 사고 |
+| **Type C** 모노레포 | `apps/admin`, `apps/user` 간 경계 | 앱 간 직접 import로 의존성 꼬임 |
+| **Type D** 마이크로서비스 | 독립 배포되는 서비스 간 경계 | API 우회한 DB 직접 접근 |
+
+하나의 프로젝트에 여러 유형이 동시에 존재할 수 있습니다 (예: Type A + Type B).
+
+### 핵심 동작 원리
+
 ```
-You:    "Use the AdminPanel component from platform in the tenant app"
-Agent:  "Sure!" *copies files, creates imports*
-Result: Tenant users can now see admin controls. Production incident.
+1. 먼저 지도를 만든다 (INIT) — 어떤 파일이 어떤 레이어에 속하는지 파악
+2. 작업 전에 신뢰점수를 측정한다 — 4축(Map/Analysis/Boundary/Intent) 0~100점
+3. 95점 미만이면 실행을 차단한다 — 부족한 항목 + 해결 순서를 알려줌
+4. 실행 후 지도를 갱신하고 경험을 기록한다 — 같은 패턴은 다음에 더 빠르게 처리
 ```
 
-DUDA blocks this by analyzing every dependency before any code moves.
+### 빠른 시작
 
-**Who needs it:**
-- Multi-tenant SaaS (shared code, separated data)
-- Platform → Tenant/Franchise hierarchies
-- Monorepos with multiple apps sharing packages
-- Microservices that should only communicate via APIs
-
-## Quick Command Reference
-
-| Command | What it does |
-|---------|-------------|
-| `duda init` | Map your project's isolation structure (run this first) |
-| `duda scan <path>` | Quick check: "Is this file safe to import?" |
-| `duda transplant` | Safely migrate code across isolation boundaries |
-| `duda audit` | Find and diagnose isolation contamination |
-| `duda fix` | Auto-generate fixes after audit/transplant diagnosis |
-| `duda guard` | Check staged files for breaches (CI/pre-commit) |
-
-## Getting Started
-
-```
-Step 1:  duda init              → Maps your entire project (one-time setup)
-Step 2:  Approve the map        → Confirms the isolation structure
-Step 3:  Work normally          → DUDA activates when it detects migration
-                                   or contamination keywords in your prompts
+```bash
+duda init              # 1. 코드베이스 격리 지도 생성 (최초 1회)
+duda scan src/some/    # 2. 특정 경로 빠른 점검
+duda transplant        # 3. 코드 이식 (신뢰점수 게이트)
+duda audit             # 4. 격리 오염 진단
+duda fix               # 5. 진단 기반 자동 수정
+duda guard             # 6. 커밋 전 격리 위반 검사
 ```
 
-After init, DUDA works automatically. It listens for keywords like "use X in Y",
-"copy from", "data leak", "wrong tenant" and activates the right mode.
+### 쓰면 뭐가 좋은가?
 
----
+- **사전 차단**: 격리 위반 코드가 커밋/배포되기 전에 잡아냄
+- **자동 학습**: 쓸수록 경험이 쌓여서 같은 패턴은 분석 없이 즉시 처리 (3회 이상 → 캐시 적용)
+- **구체적 가이드**: "안 돼"로 끝나지 않고, 어떤 전략(직접 참조/어댑터/재구현)으로 해결할지 알려줌
+- **점진적 자동화**: SHOW(읽기) → SUGGEST(제안) → APPLY(적용) → AUTO(자동) 4단계
+
+<!-- HELP END -->
 
 ---
 
