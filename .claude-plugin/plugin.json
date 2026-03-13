@@ -7,8 +7,6 @@
   },
   "repository": "https://github.com/DavidKim0326/DUDA",
   "license": "Apache-2.0",
-  "skills": [
-    "skills/duda"
-  ],
-  "hooks": "hooks/hooks.json"
+  "skills": "./skills/duda",
+  "hooks": "./hooks/hooks.json"
 }
