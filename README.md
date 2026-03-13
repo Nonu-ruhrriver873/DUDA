@@ -258,10 +258,8 @@ Transplant deny list:
 ## Update
 
 ```bash
-/plugin install duda
+/plugin update duda@duda-marketplace
 ```
-
-Re-running install pulls the latest version automatically.
 
 ## Uninstall
 
