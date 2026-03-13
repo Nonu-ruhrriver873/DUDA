@@ -255,6 +255,14 @@ Transplant deny list:
 - **Python 3.8+** (optional — for script automation; manual mode works without)
 - No external pip packages required (stdlib only)
 
+## Update
+
+```bash
+/plugin install duda
+```
+
+Re-running install pulls the latest version automatically.
+
 ## Uninstall
 
 ```bash
