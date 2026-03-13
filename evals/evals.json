@@ -1,0 +1,227 @@
+{
+  "skill_name": "duda",
+  "version": "1.0.0",
+  "evals": [
+    {
+      "id": 1,
+      "mode": "TRANSPLANT",
+      "prompt": "Bring over the config management screen from platform to tenant dashboard",
+      "expected_output": "DUDA TRANSPLANT mode activates, detects transplant-deny item (config management), selects Strategy 4 (transplant denied), and blocks execution. No code is copied.",
+      "expectations": [
+        "TRANSPLANT mode activation is stated",
+        "Phase 0 asks user to confirm this is a transplant operation",
+        "Trust measurement (trust.py) is performed",
+        "Strategy 4 (transplant denied) is selected",
+        "Config management or UPPER-ONLY or transplant-deny is cited as reason",
+        "No code is copied or files created"
+      ]
+    },
+    {
+      "id": 2,
+      "mode": "AUDIT",
+      "prompt": "The tenant menu list page is showing data from other organizations. Why?",
+      "expected_output": "DUDA AUDIT mode activates and traces contamination. Determines Type B (multi-tenant) isolation policy leak as root cause. Presents recovery prompt to add tenant identifier (org_id) and includes verification checklist.",
+      "expectations": [
+        "AUDIT mode activation is stated",
+        "Symptom layer (tenant) and exposed data (other org data) are captured",
+        "grep or audit.py based contamination path search is performed",
+        "Type B (multi-tenant) or isolation policy leak is determined as root cause",
+        "org_id or tenant identifier addition is presented as recovery method",
+        "Verification checklist is included in output",
+        "Post-recovery verification steps are provided"
+      ]
+    },
+    {
+      "id": 3,
+      "mode": "TRANSPLANT",
+      "prompt": "I want to use the LoadingSpinner component from platform in tenant screens too",
+      "expected_output": "DUDA TRANSPLANT mode activates, analyzes LoadingSpinner, confirms [SHARED] tag, and selects Strategy 1 (direct reference). Provides safe import from packages/ path. No file copying.",
+      "expectations": [
+        "TRANSPLANT mode activation is stated",
+        "LoadingSpinner import dependencies are analyzed",
+        "SHARED tag is assigned",
+        "Trust score of 95+ is confirmed",
+        "Strategy 1 (direct reference) is selected",
+        "Import from packages/ or shared path is provided",
+        "LoadingSpinner is NOT copy-pasted into tenant/ directory"
+      ]
+    },
+    {
+      "id": 4,
+      "mode": "INIT",
+      "prompt": "duda init",
+      "expected_output": "DUDA INIT mode activates and runs init.py-based topological flood fill exploration. Generates DUDA_MAP.md and requests user approval.",
+      "expectations": [
+        "INIT mode activation is stated",
+        "init.py or topological flood fill exploration is executed",
+        "Leaf files are collected first in topological sort",
+        "DUDA_MAP.md is generated or generation is attempted",
+        "Boundary file checksums are registered",
+        "User approval is requested",
+        "Ambiguous tag items are separately listed"
+      ]
+    },
+    {
+      "id": 5,
+      "mode": "TRANSPLANT",
+      "prompt": "Use the useMenuStore from platform in tenant app",
+      "expected_output": "DUDA TRANSPLANT mode activates, detects unapproved DUDA_MAP state, and blocks at trust gate. Instructs to run 'duda init' or approve the map first.",
+      "expectations": [
+        "TRANSPLANT mode activates",
+        "Trust measurement is performed",
+        "Map unapproved state causes low map trust score",
+        "Overall trust below 95 is stated",
+        "Execution is blocked",
+        "duda init or approval procedure is instructed"
+      ]
+    },
+    {
+      "id": 6,
+      "mode": "AUDIT",
+      "prompt": "The tenant screen is suddenly showing the platform admin menu",
+      "expected_output": "DUDA AUDIT mode activates and detects Type A (component contamination) root cause. Finds lower layer file importing upper-only component (AdminMenu) and presents removal/fix prompt with verification checklist.",
+      "expectations": [
+        "AUDIT mode activates",
+        "Type A (component contamination) or UPPER-ONLY import is identified as root cause",
+        "Search for upper-path imports in lower layer is performed",
+        "Affected files are identified",
+        "UPPER-ONLY import removal is presented as fix",
+        "Verification checklist is included",
+        "Inference-based analysis is used if actual files are not found"
+      ]
+    },
+    {
+      "id": 7,
+      "mode": "TRANSPLANT",
+      "prompt": "I want to use the MenuCard component from platform in tenant, but platform-only cost fields must not be visible",
+      "expected_output": "DUDA TRANSPLANT mode activates, detects UPPER-ONLY dependency (masterConfigStore/rawCostStore), and selects Strategy 2 (adapter branching). Presents mode prop or conditional rendering approach to hide cost fields.",
+      "expectations": [
+        "TRANSPLANT mode activates",
+        "Upper-only store or cost-related import is detected as UPPER-ONLY",
+        "Strategy 2 (adapter branching) is selected",
+        "Strategy 1 (direct copy) or Strategy 4 (deny) is NOT selected",
+        "Mode prop or conditional rendering method is presented",
+        "Upper-only store is NOT directly imported in tenant",
+        "Before/after code examples are provided"
+      ]
+    },
+    {
+      "id": 8,
+      "mode": "TRANSPLANT",
+      "prompt": "Apply the login logic from platform to tenant",
+      "expected_output": "DUDA_MAP missing is detected and TRANSPLANT is blocked. Instructs to run 'duda init' first.",
+      "expectations": [
+        "DUDA_MAP missing is detected",
+        "TRANSPLANT is blocked",
+        "duda init or initialization is instructed first",
+        "No transplant analysis is performed without map"
+      ]
+    },
+    {
+      "id": 9,
+      "mode": "SCAN",
+      "prompt": "duda scan src/tenant/components/OrderForm.tsx",
+      "expected_output": "DUDA SCAN mode activates (lite mode), analyzes the single file without requiring DUDA_MAP, and outputs layer tag, risk level, and import analysis.",
+      "expectations": [
+        "SCAN mode activation is stated",
+        "No DUDA_MAP is required",
+        "All imports in the file are listed and tagged",
+        "Risk level assessment is provided",
+        "Quick recommendation is given (safe to use / needs adapter / deny)"
+      ]
+    },
+    {
+      "id": 10,
+      "mode": "AUDIT",
+      "prompt": "Order service is reading directly from inventory database instead of going through the API",
+      "expected_output": "DUDA AUDIT mode activates, detects Type D (microservice boundary violation). Identifies direct DB access across service boundary and provides API-based fix with verification checklist.",
+      "expectations": [
+        "AUDIT mode activates",
+        "Type D (microservice) boundary violation is identified",
+        "Direct DB access across service boundary is flagged",
+        "API boundary-based fix is presented",
+        "Verification checklist is included"
+      ]
+    },
+    {
+      "id": 11,
+      "mode": "TRANSPLANT",
+      "prompt": "Can I use the shared Button component from packages/ui in my tenant app?",
+      "expected_output": "DUDA TRANSPLANT mode activates, confirms the component is in packages/ (shared), assigns [SHARED] tag, and permits with Strategy 1. Minimal friction for safe operations.",
+      "expectations": [
+        "TRANSPLANT mode activates",
+        "packages/ path is recognized as shared",
+        "SHARED tag is assigned",
+        "Strategy 1 (direct reference) is selected",
+        "Trust score is high due to packages/ being inherently shared",
+        "Simple import instruction is provided"
+      ]
+    },
+    {
+      "id": 12,
+      "mode": "AUDIT",
+      "prompt": "Apps in our monorepo are importing directly from each other instead of going through packages",
+      "expected_output": "DUDA AUDIT mode activates, detects Type C (monorepo boundary violation). Identifies cross-app imports and recommends extracting to packages/.",
+      "expectations": [
+        "AUDIT mode activates",
+        "Type C (monorepo boundary) is identified",
+        "Cross-app direct imports are detected",
+        "Extract-to-packages fix is recommended",
+        "Verification checklist is included"
+      ]
+    },
+    {
+      "id": 13,
+      "mode": "INIT",
+      "prompt": "Initialize the isolation map for this project",
+      "expected_output": "DUDA INIT mode activates via natural language trigger (not explicit 'duda init'). Runs the same topological exploration and DUDA_MAP generation.",
+      "expectations": [
+        "INIT mode activates from natural language",
+        "init.py or topological exploration is executed",
+        "DUDA_MAP.md generation proceeds normally",
+        "User approval is requested"
+      ]
+    },
+    {
+      "id": 14,
+      "mode": "TRANSPLANT",
+      "prompt": "Migrate the dashboard analytics module from the platform app to the tenant app. It uses dynamic imports based on user role.",
+      "expected_output": "DUDA TRANSPLANT mode activates, detects [UNVERIFIABLE] tags due to dynamic imports, and either blocks or requires manual verification before proceeding.",
+      "expectations": [
+        "TRANSPLANT mode activates",
+        "Dynamic import pattern is detected",
+        "[UNVERIFIABLE] tag is assigned",
+        "Manual verification is required before proceeding",
+        "Trust score is reduced due to unverifiable items",
+        "Resolution steps for converting dynamic to static imports are suggested"
+      ]
+    },
+    {
+      "id": 15,
+      "mode": "AUDIT",
+      "prompt": "Tenant A is seeing tenant B's cached menu data",
+      "expected_output": "DUDA AUDIT mode activates, detects Type B (shared cache without tenant key). Identifies cache key missing org_id and provides fix.",
+      "expectations": [
+        "AUDIT mode activates",
+        "Type B (multi-tenant) cache contamination is identified",
+        "Missing tenant identifier in cache key is flagged",
+        "Fix includes adding org_id to cache key",
+        "Verification checklist is included"
+      ]
+    },
+    {
+      "id": 16,
+      "mode": "TRANSPLANT",
+      "prompt": "I need to use platform's error handling middleware in the tenant service",
+      "expected_output": "DUDA TRANSPLANT mode activates, analyzes middleware dependencies, determines it likely contains platform-specific logic, and recommends appropriate strategy (adapter or rebuild).",
+      "expectations": [
+        "TRANSPLANT mode activates",
+        "Middleware file dependencies are analyzed",
+        "Platform-specific vs shared logic is distinguished",
+        "Appropriate strategy (2 or 3) is selected based on analysis",
+        "Trust score measurement is performed",
+        "No direct copy of middleware is allowed"
+      ]
+    }
+  ]
+}
