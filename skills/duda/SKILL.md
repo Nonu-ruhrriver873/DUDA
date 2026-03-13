@@ -21,6 +21,14 @@ description: >
   [SCAN mode] Lightweight mode: "duda scan <path>" for quick single-file/directory
   analysis without requiring DUDA_MAP. Outputs layer tag, risk assessment, import analysis.
 
+  [ACT mode] Triggered by "duda fix", "duda act", or auto-enters after AUDIT/TRANSPLANT
+  diagnosis. Generates fix code, shows diff preview, applies after confirmation.
+  Evaluator-Optimizer loop: re-audits after fix, max 3 iterations.
+  Progressive automation: SHOW → SUGGEST → APPLY → AUTO.
+
+  [GUARD mode] Triggered by "duda guard" or CI/pre-commit integration.
+  Checks staged/changed files for isolation breaches. Exits 0 (pass) or 1 (breach).
+
   Explicitly invocable via "duda" or "DUDA" keywords.
   Applies to all isolation architectures: platform→derivative hierarchies,
   B2B SaaS multi-tenant, monorepo app boundaries, and microservice boundaries.
@@ -406,6 +414,68 @@ Verification:
 
 ---
 
+## ACT Mode — Automated Fix Generation
+
+> **Ref:** bkit pdca-iterator (Evaluator-Optimizer loop), ESLint --fix, Terraform plan-before-apply.
+> See `references/act-guard.md` for full specification and `REFERENCES.md` for attribution.
+
+### When
+- After AUDIT identifies contamination → `duda fix`
+- After TRANSPLANT selects strategy → auto-enters ACT
+- Explicit: `duda act` or `duda fix`
+
+### Progressive Automation (4 Stages)
+
+| Stage | Command | Requires | Output |
+|-------|---------|----------|--------|
+| **SHOW** | `duda scan` | Nothing | Read-only risk assessment |
+| **SUGGEST** | `duda audit` / `duda transplant` | Map | Strategy + shortfalls (no code changes) |
+| **APPLY** | `duda fix` / `duda act` | Trust ≥ 95 | Generate fix → show diff → confirm → apply |
+| **AUTO** | `duda fix --auto` | Trust ≥ 95 + Memory ≥ HIGH | Apply cached fix, notify only |
+
+### Flow
+
+```
+1. Parse diagnosis output (AUDIT root cause or TRANSPLANT strategy)
+2. Generate fix plan with diff preview (read-only)
+3. User confirms → apply fixes in reverse file order
+4. Re-audit to verify (Evaluator-Optimizer loop, max 3 iterations)
+5. Update map + memory
+```
+
+Fix plans are root-cause-specific:
+- **Policy leak** → Add tenant filter / RLS
+- **Component contamination** → Create adapter or shared version
+- **State contamination** → Split store/context by layer
+- **Boundary violation** → Replace direct import with API call
+
+---
+
+## GUARD Mode — CI / Pre-commit Isolation Gate
+
+> **Ref:** Terraform drift detection, GitHub Actions CI gate.
+> See `references/act-guard.md` for setup templates and `REFERENCES.md` for attribution.
+
+### When
+- `duda guard` — check all staged files
+- `duda guard --ci` — non-interactive CI mode (exit code 0/1)
+- Pre-commit hook or GitHub Actions integration
+
+### Flow
+
+```
+1. Collect staged/changed files
+2. Run isolation breach check (imports, DB queries, boundary crossings)
+3. Output results:
+   - Interactive: human-readable with suggestions
+   - CI (--ci): JSON with exit code 0 (pass) / 1 (breach)
+4. Block commit/PR if breaches found
+```
+
+See `references/act-guard.md` for pre-commit hook setup and GitHub Actions workflow template.
+
+---
+
 ## Isolation Type Reference
 
 See `references/patterns.md` for detailed risk and fix patterns.
@@ -508,39 +578,11 @@ Decision log:  156 entries
 
 ## Manual Mode (No Python Required)
 
-When Python is not available, DUDA guides you through manual analysis.
+When Python is not available, use grep-based analysis:
 
-### Manual INIT
-1. List all import statements:
-   ```bash
-   grep -rn "from\|import" --include="*.ts" --include="*.tsx" src/
-   ```
-2. Identify leaf files (files that don't import from your project — only external packages)
-3. Tag each file based on its imports:
-   - References only `packages/` or external → `[SHARED]`
-   - References `platform/`, `admin/`, `system/` paths → `[UPPER-ONLY]`
-   - References specific layer paths → `[LAYER:X]`
-4. Create `DUDA_MAP.md` with the tagging results
-5. Identify boundary files (layout.tsx, middleware.ts, route.ts) and note their layer
-
-### Manual TRANSPLANT
-1. List all imports in the source file
-2. For each import, determine the layer tag (SHARED/UPPER-ONLY/NEEDS-ADAPTER)
-3. Check DB queries for tenant identifier (`org_id`, `tenant_id`, etc.)
-4. If any `[UPPER-ONLY]` → cannot transplant directly, use adapter or deny
-5. If all `[SHARED]` → safe to reference from packages/
-
-### Manual AUDIT
-1. Identify the symptom layer and what's incorrectly visible
-2. Search for cross-layer imports:
-   ```bash
-   grep -rn "from.*platform\|from.*system\|from.*admin" src/tenant/ --include="*.ts"
-   ```
-3. Search for DB queries missing tenant filter:
-   ```bash
-   grep -rn "\.from(" src/ --include="*.ts" | grep -v "org_id\|tenant_id"
-   ```
-4. Trace the contamination path from root cause to symptom
+- **INIT:** `grep -rn "from\|import" --include="*.ts" src/` → tag each file as SHARED/UPPER-ONLY/LAYER:X → create DUDA_MAP.md
+- **TRANSPLANT:** List imports in source → check layer tags → check DB queries for tenant ID
+- **AUDIT:** `grep -rn "from.*platform" src/tenant/` → find cross-layer imports → `grep -rn "\.from(" src/ | grep -v "org_id"` → find missing tenant filters
 
 ---
 

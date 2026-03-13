@@ -113,6 +113,24 @@ You: Tenant A is seeing tenant B's data on the menu page
 
 Traces the contamination path, determines root cause, and provides fix with verification checklist.
 
+### 🔧 ACT — Automated Fix Generation *(v2.0)*
+
+```
+You: duda fix
+```
+
+After AUDIT or TRANSPLANT diagnosis, generates fix code with diff preview. Applies only after confirmation. Re-audits to verify the fix worked (max 3 iterations).
+
+**Progressive automation:** SHOW → SUGGEST → APPLY → AUTO (memory-accelerated)
+
+### 🛡️ GUARD — CI / Pre-commit Gate *(v2.0)*
+
+```
+You: duda guard
+```
+
+Checks staged files for isolation breaches. Integrates with pre-commit hooks and GitHub Actions. Blocks commits that violate isolation boundaries.
+
 ---
 
 ## Isolation Types

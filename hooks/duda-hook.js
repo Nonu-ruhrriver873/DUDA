@@ -68,6 +68,34 @@ const TRIGGERS = {
     ],
   },
 
+  // ACT mode triggers (fix generation)
+  act: {
+    explicit: [
+      "duda fix",
+      "duda act",
+      "duda apply fix",
+    ],
+    patterns: [
+      /\bduda\s+(fix|act|apply|patch)\b/i,
+      /\b(fix|patch|resolve)\s+(the\s+)?(contamination|breach|violation|isolation)\b/i,
+      /\b(auto[- ]?fix|generate\s+fix|apply\s+fix)\b/i,
+    ],
+  },
+
+  // GUARD mode triggers (CI/pre-commit gate)
+  guard: {
+    explicit: [
+      "duda guard",
+      "duda gate",
+      "duda pre-commit",
+    ],
+    patterns: [
+      /\bduda\s+(guard|gate|check[- ]?commit)\b/i,
+      /\b(isolation\s+(check|gate)|pre[- ]?commit\s+check)\b.*\b(duda|isolation)\b/i,
+      /\bcheck\s+staged\s+(files?\s+)?(for\s+)?(isolation|breach|contamination)\b/i,
+    ],
+  },
+
   // AUDIT mode triggers
   audit: {
     explicit: [
@@ -170,6 +198,8 @@ function generateContext(mode, confidence) {
     init: "DUDA INIT mode — Generate isolation map via topological exploration",
     scan: "DUDA SCAN mode — Quick single-file/directory analysis (lite, no map required)",
     transplant: "DUDA TRANSPLANT mode — Analyze and safely migrate code across isolation boundaries",
+    act: "DUDA ACT mode — Generate and apply isolation fixes (post-AUDIT or post-TRANSPLANT)",
+    guard: "DUDA GUARD mode — Check staged files for isolation breaches (CI/pre-commit gate)",
     audit: "DUDA AUDIT mode — Trace and fix isolation contamination",
   };
 

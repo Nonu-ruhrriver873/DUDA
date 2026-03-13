@@ -2,6 +2,31 @@
 
 All notable changes to DUDA will be documented in this file.
 
+## [2.0.0] - 2026-03-14
+
+### Added
+- **ACT mode** — Automated fix generation after AUDIT/TRANSPLANT diagnosis
+  - Fix plan generation with diff preview (read-only until confirmation)
+  - Evaluator-Optimizer loop: re-audit after fix, max 3 iterations
+  - Strategy-specific code generation (adapter, reimplementation, direct reference)
+  - Progressive automation: SHOW → SUGGEST → APPLY → AUTO
+- **GUARD mode** — CI/pre-commit isolation gate
+  - Pre-commit hook integration (exit 0/1)
+  - GitHub Actions workflow template
+  - JSON output for CI parsing
+  - Checks staged/changed files for isolation breaches
+- **REFERENCES.md** — Attribution for patterns referenced from bkit v1.6.1 and industry tools
+- Hook triggers for ACT and GUARD modes in duda-hook.js
+
+### Referenced Patterns (see REFERENCES.md)
+- bkit pdca-iterator: Evaluator-Optimizer loop (agents/pdca-iterator.md)
+- bkit automation.js: Progressive automation levels (lib/pdca/automation.js)
+- bkit gap-detector: Match rate → conditional branching (agents/gap-detector.md)
+- bkit code-analyzer: Read-only analysis mode (agents/code-analyzer.md)
+- ESLint --fix: Reverse-position batch apply
+- Terraform: Plan-before-apply, drift detection
+- Snyk: Fixability scoring
+
 ## [1.0.1] - 2026-03-14
 
 ### Fixed
