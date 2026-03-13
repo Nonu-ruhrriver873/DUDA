@@ -1,0 +1,33 @@
+{
+  "name": "duda-marketplace",
+  "owner": {
+    "name": "DavidKim0326",
+    "email": "davidkim0326@users.noreply.github.com"
+  },
+  "metadata": {
+    "description": "DUDA — Isolation Guardian Plugin for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "duda",
+      "source": "./",
+      "description": "Prevents, diagnoses, and recovers isolation contamination in multi-layered architectures (multi-tenant SaaS, platform-derivative, monorepo, microservice).",
+      "version": "1.0.0",
+      "author": {
+        "name": "DavidKim0326"
+      },
+      "repository": "https://github.com/DavidKim0326/DUDA",
+      "license": "Apache-2.0",
+      "keywords": [
+        "isolation",
+        "multi-tenant",
+        "monorepo",
+        "security",
+        "architecture",
+        "guardian"
+      ],
+      "category": "security"
+    }
+  ]
+}
