@@ -40,72 +40,72 @@ description: >
 
 ## What is DUDA?
 
-**격리(Isolation) 경계가 있는 프로젝트에서, AI가 코드를 건드릴 때 격리를 깨뜨리지 않도록 지키는 스킬입니다.**
+**A skill that prevents AI agents from breaking isolation boundaries when modifying code in multi-layered projects.**
 
-> 두더지는 땅 위에서는 따로따로지만, 땅 밑에서는 전부 터널로 연결되어 있습니다.
-> 이식 요청은 터널 전체를 파악한 다음에만 실행됩니다.
-> 신뢰점수 95점 미만이면 실행이 차단됩니다.
+> Moles appear separate above ground, but underground they're all connected by tunnels.
+> A transplant request is executed only after mapping the entire tunnel system.
+> Execution is blocked below a 95-point trust score.
 
-### 이런 문제를 해결합니다
+### Problems DUDA Solves
 
-| 문제 상황 | DUDA 없이 | DUDA 있으면 |
-|----------|----------|------------|
-| 플랫폼 관리자용 컴포넌트를 테넌트에 복사 | 상위 전용 데이터가 하위에 노출. 배포 후 발견 | 복사 전에 `[UPPER-ONLY]` 태그로 차단. 어댑터 패턴 제안 |
-| DB 쿼리에서 `org_id` 필터 누락 | 다른 테넌트 데이터가 유출. 고객 신고로 발견 | 쿼리 분석에서 tenant identifier 누락 감지. 신뢰점수 하락 → 차단 |
-| 모노레포에서 앱 간 직접 import | 빌드 깨짐 + 권한 우회. CI에서 발견 | `duda guard`가 커밋 전에 경계 위반 차단 |
-| 마이크로서비스 간 DB 직접 접근 | 서비스 경계 무너짐. 장애 시 발견 | audit에서 API 우회 경로 탐지. 수정 방법 제시 |
+| Scenario | Without DUDA | With DUDA |
+|----------|-------------|-----------|
+| Copy admin component to tenant layer | Admin-only data exposed to tenants. Found after deployment | Blocked before copy with `[UPPER-ONLY]` tag. Suggests adapter pattern |
+| DB query missing `org_id` filter | Other tenant's data leaks. Found via customer report | Detects missing tenant identifier in query analysis. Trust score drops → blocked |
+| Direct import across monorepo apps | Build breaks + permission bypass. Found in CI | `duda guard` blocks boundary violation before commit |
+| Direct DB access between microservices | Service boundary collapses. Found during outage | Audit detects API bypass path. Provides fix strategy |
 
-**한마디로**: AI가 "잘 동작하는 코드"를 만들지만 격리가 조용히 깨져있는 상황 — 이걸 코드 한 줄 건드리기 전에 막아줍니다.
+**In short**: AI creates "working code" but silently breaks isolation — DUDA catches this before a single line of code is touched.
 
-### 언제, 어떤 명령어를 쓰면 되는가?
+### When to Use Each Command
 
-| 이런 상황일 때 | 명령어 | 뭘 해주는가 |
-|--------------|--------|-----------|
-| **처음 시작** — 프로젝트에 DUDA를 적용할 때 | `duda init` | 코드베이스 전체를 탐색해서 격리 지도(DUDA_MAP.md)를 생성. 어떤 파일이 어떤 레이어인지 자동 분류 |
-| **빠른 확인** — "이 파일 저쪽에서 써도 되나?" | `duda scan <path>` | 해당 파일의 import를 분석해서 위험도를 즉시 알려줌. **지도 없이도 사용 가능** |
-| **코드 이식** — 기능을 다른 레이어로 옮길 때 | `duda transplant` | 소스 분석 → 4축 신뢰점수 측정 → 95점 이상일 때만 이식 전략 제시 + 실행 |
-| **사고 대응** — "다른 테넌트 데이터가 보여요" | `duda audit` | 오염 경로를 역추적해서 근본 원인(4가지 유형)과 수정 방법을 알려줌 |
-| **자동 수정** — 진단 결과 기반으로 고치고 싶을 때 | `duda fix` | 수정 코드 생성 → diff 미리보기 → 확인 후 적용. 최대 3회 반복 검증 |
-| **사전 차단** — 커밋 전 격리 위반 확인 | `duda guard` | 변경 파일들의 격리 위반 검사. CI/pre-commit hook 연동 가능 |
-| **지도 갱신** — 코드가 많이 바뀌었을 때 | `duda update` | DUDA_MAP.md를 현재 코드 상태로 재생성 |
+| Situation | Command | What it does |
+|-----------|---------|-------------|
+| **First setup** — Applying DUDA to a project | `duda init` | Explores entire codebase and generates isolation map (DUDA_MAP.md). Auto-classifies each file by layer |
+| **Quick check** — "Is this file safe to import?" | `duda scan <path>` | Analyzes imports and shows risk level instantly. **Works without a map** |
+| **Code migration** — Moving features across layers | `duda transplant` | Analyzes source → measures 4-axis trust score → executes strategy only at 95+ points |
+| **Incident response** — "Wrong tenant data is showing" | `duda audit` | Traces contamination path back to root cause (4 types) and provides fix strategy |
+| **Auto-fix** — Apply fixes from diagnosis | `duda fix` | Generates fix code → shows diff preview → applies after confirmation. Up to 3 verification loops |
+| **Pre-commit gate** — Check for breaches before commit | `duda guard` | Checks changed files for isolation violations. CI/pre-commit hook integration available |
+| **Map refresh** — Codebase has changed significantly | `duda update` | Regenerates DUDA_MAP.md from current code state |
 
-### 어떤 프로젝트에서 쓸 수 있는가?
+### What Projects Can Use DUDA?
 
-| 격리 유형 | 예시 | 전형적인 위험 |
-|----------|------|-------------|
-| **Type A** 플랫폼-파생 | 본사 플랫폼 → 가맹점/테넌트 앱 | 상위 전용 기능이 하위로 유출 |
-| **Type B** 멀티테넌트 | B2B SaaS에서 회사별 데이터 격리 | 다른 회사 데이터가 보이는 사고 |
-| **Type C** 모노레포 | `apps/admin`, `apps/user` 간 경계 | 앱 간 직접 import로 의존성 꼬임 |
-| **Type D** 마이크로서비스 | 독립 배포되는 서비스 간 경계 | API 우회한 DB 직접 접근 |
+| Isolation Type | Example | Typical Risk |
+|---------------|---------|-------------|
+| **Type A** Platform-Derivative | HQ platform → Franchise/Tenant apps | Upper-only features leak to lower layers |
+| **Type B** Multi-tenant | Per-company data isolation in B2B SaaS | Cross-tenant data exposure |
+| **Type C** Monorepo Boundary | `apps/admin` vs `apps/user` boundaries | Cross-app direct imports causing dependency tangles |
+| **Type D** Microservice | Independently deployed service boundaries | Direct DB access bypassing API boundaries |
 
-하나의 프로젝트에 여러 유형이 동시에 존재할 수 있습니다 (예: Type A + Type B).
+Multiple types can coexist in a single project (e.g., Type A + Type B).
 
-### 핵심 동작 원리
+### How It Works
 
 ```
-1. 먼저 지도를 만든다 (INIT) — 어떤 파일이 어떤 레이어에 속하는지 파악
-2. 작업 전에 신뢰점수를 측정한다 — 4축(Map/Analysis/Boundary/Intent) 0~100점
-3. 95점 미만이면 실행을 차단한다 — 부족한 항목 + 해결 순서를 알려줌
-4. 실행 후 지도를 갱신하고 경험을 기록한다 — 같은 패턴은 다음에 더 빠르게 처리
+1. Map first (INIT)     — Identify which file belongs to which layer
+2. Measure trust        — 4-axis scoring (Map/Analysis/Boundary/Intent), 0~100 points
+3. Block below 95       — Shows shortfall items + resolution order
+4. Learn after action   — Records experience for faster processing next time
 ```
 
-### 빠른 시작
+### Quick Start
 
 ```bash
-duda init              # 1. 코드베이스 격리 지도 생성 (최초 1회)
-duda scan src/some/    # 2. 특정 경로 빠른 점검
-duda transplant        # 3. 코드 이식 (신뢰점수 게이트)
-duda audit             # 4. 격리 오염 진단
-duda fix               # 5. 진단 기반 자동 수정
-duda guard             # 6. 커밋 전 격리 위반 검사
+duda init              # 1. Generate isolation map (one-time setup)
+duda scan src/some/    # 2. Quick-check a specific path
+duda transplant        # 3. Migrate code (trust score gate)
+duda audit             # 4. Diagnose isolation contamination
+duda fix               # 5. Auto-fix from diagnosis
+duda guard             # 6. Pre-commit isolation breach check
 ```
 
-### 쓰면 뭐가 좋은가?
+### Why Use DUDA?
 
-- **사전 차단**: 격리 위반 코드가 커밋/배포되기 전에 잡아냄
-- **자동 학습**: 쓸수록 경험이 쌓여서 같은 패턴은 분석 없이 즉시 처리 (3회 이상 → 캐시 적용)
-- **구체적 가이드**: "안 돼"로 끝나지 않고, 어떤 전략(직접 참조/어댑터/재구현)으로 해결할지 알려줌
-- **점진적 자동화**: SHOW(읽기) → SUGGEST(제안) → APPLY(적용) → AUTO(자동) 4단계
+- **Proactive blocking**: Catches isolation violations before code is committed or deployed
+- **Self-learning**: Accumulates experience — same patterns skip analysis after 3+ encounters (cache hit)
+- **Actionable guidance**: Doesn't just say "no" — tells you which strategy (direct reference / adapter / reimplementation) to use
+- **Progressive automation**: SHOW (read-only) → SUGGEST (strategy) → APPLY (confirm+fix) → AUTO (cached instant fix)
 
 <!-- HELP END -->
 
