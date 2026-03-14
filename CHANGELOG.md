@@ -2,6 +2,31 @@
 
 All notable changes to DUDA will be documented in this file.
 
+## [2.1.0] - 2026-03-14
+
+### Added
+- **SCOPE mode** — Feature-centric isolation analysis (new)
+  - Accepts natural language feature descriptions instead of file paths
+  - `duda scope "account permission management"` discovers all related files
+  - Auto keyword extraction + synonym expansion
+  - Import chain expansion (configurable depth)
+  - Relevance scoring (0.0~1.0) with configurable threshold
+  - Layer grouping via DUDA_MAP integration
+  - Cross-layer dependency detection and risk assessment
+  - Risk levels: LOW / MEDIUM / HIGH / CRITICAL
+  - Scope result caching for instant re-analysis
+  - Works with or without DUDA_MAP (degraded mode without map)
+  - JSON output (`--json`) for programmatic use
+  - File-only output (`--files-only`) for piping to other DUDA commands
+  - Manual mode fallback (grep-based, no Python required)
+
+### Improved
+- **Help section** rewritten with comprehensive English guide
+  - Problem/solution comparison table
+  - Situation-based command reference
+  - Supported isolation types with examples
+  - Quick start guide and key benefits
+
 ## [2.0.0] - 2026-03-14
 
 ### Added

@@ -4,6 +4,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://claude.ai/claude-code)
+[![Version](https://img.shields.io/badge/version-2.1.0-green)](CHANGELOG.md)
 [![Eval TCs](https://img.shields.io/badge/Eval%20TCs-16%20cases-brightgreen)](evals/evals.json)
 
 ---
@@ -89,6 +90,32 @@ You: duda scan src/tenant/components/OrderForm.tsx
 ```
 
 Lightweight analysis of a single file. Answers: "Is this safe to import in my layer?"
+
+### 🎯 SCOPE — Feature-Centric Analysis *(v2.1)*
+
+```
+You: duda scope "account permission management"
+```
+
+Discovers all files related to a feature by keyword search + import chain expansion. Groups by isolation layer and shows cross-layer violations at a glance.
+
+**Think in features, not file paths:**
+
+```
+Without SCOPE:  "Which files handle permissions? src/auth? src/middleware/rbac?
+                 The admin components? Let me run duda scan on each one..."
+
+With SCOPE:     "duda scope permissions" → 15 files found, 3 cross-layer violations,
+                 risk level HIGH, recommended: duda audit
+```
+
+| Flag | Description |
+|------|-------------|
+| `--depth 2` | Expand import chains 2 levels deep |
+| `--min-score 0.7` | Only show high-relevance files |
+| `--files-only` | Output paths only (pipe to other commands) |
+| `--json` | Machine-readable JSON output |
+| `--no-map` | Skip DUDA_MAP for faster results |
 
 ### 🚚 TRANSPLANT — Safe Code Migration
 
@@ -204,6 +231,7 @@ DUDA/
 │   └── duda-hook.js          ← UserPromptSubmit trigger detection
 ├── scripts/
 │   ├── init.py               ← Topological exploration + map generation
+│   ├── scope.py              ← Feature-centric file discovery + analysis (v2.1)
 │   ├── analyze.py            ← Import dependency analysis + layer tagging
 │   ├── trust.py              ← 4-axis trust measurement + 95-point gate
 │   ├── audit.py              ← Contamination path detection + root cause
