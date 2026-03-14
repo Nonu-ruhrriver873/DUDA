@@ -4,7 +4,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://claude.ai/claude-code)
-[![Version](https://img.shields.io/badge/version-2.1.0-green)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.1.1-green)](CHANGELOG.md)
 [![Eval TCs](https://img.shields.io/badge/Eval%20TCs-16%20cases-brightgreen)](evals/evals.json)
 
 ---
@@ -240,7 +240,10 @@ DUDA/
 │   ├── map_update.py         ← Post-work partial map refresh
 │   └── memory.py             ← Recursive learning memory
 ├── references/
-│   └── patterns.md           ← Risk/fix patterns by isolation type
+│   ├── patterns.md           ← Risk/fix patterns by isolation type
+│   ├── act-guard.md          ← ACT fix spec + GUARD CI templates
+│   ├── trust-scoring.md      ← 4-axis trust score detail + rationale
+│   └── memory.md             ← Recursive learning memory system
 ├── evals/
 │   └── evals.json            ← 16 skill validation test cases
 ├── README.md
